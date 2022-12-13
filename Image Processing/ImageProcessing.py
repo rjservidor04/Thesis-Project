@@ -2,65 +2,23 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
  
-# Read image
+# read image
 img = cv2.imread(r"C:\Users\acer\Documents\Thesis\LateralView\Cropped_LV_100.jpg")
 
-# show loaded image
-# cv2.imshow("Loaded Image", image)
- 
-# # Manual Selection of ROI
-# r = cv2.selectROI("select the area", image)
-# cropped_image = image[int(r[1]):int(r[1]+r[3]),
-#                       int(r[0]):int(r[0]+r[2])]
-# cv2.imshow("Cropped image", cropped_image)
-# cv2.waitKey(0)
-
-# #resize the image with specified size
-# img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-# img = cv2.resize(img, (256, 256))
-# cv2.imshow("Image", img)
-# cv2.waitKey(0)
 
 # resize the image using proportion
-h, w = img.shape[:2]
-new_h, new_w = int(h / 4), int(w / 4)
-img = cv2.resize(img, (new_w, new_h))
-cv2.imshow("Resized Image", img)
-img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+def grayscale_resize(img) :
+   h, w = img.shape[:2]
+   new_h, new_w = int(h / 4), int(w / 4)
+   img = cv2.resize(img, (new_w, new_h))
+   cv2.imshow("Resized Image", img)
+   img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-# Image Projection
-# h, w = img.shape[:2]
-# new_h, new_w = int(h / 4), int(w / 4)
-# img = cv2.resize(img, (new_w, new_h))
-# gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-# _, img = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+   return img
 
-# Vertical Image Projection
-# v_proj = np.sum(img, 1)
-# v_max = np.max(v_proj)
-# y = img.shape[1]
-# vertical = np.zeros((v_proj.shape[0], y))
-# for row in range(img.shape[0]):
-#    cv2.line(vertical, (0, row), (int(v_proj[row] * y / v_max), row), (255, 255, 255), 1)
-# cv2.imshow("Vertical Projection", vertical)
-
-# Horizontal Image Projection
-# h_proj = np.sum(img, 0)
-# h_max = np.max(h_proj)
-# x = img.shape[0]
-# horizontal = np.zeros((x, h_proj.shape[0]))
-# for col in range(img.shape[1]):
-#    cv2.line(horizontal, (col, 0), (col, int(h_proj[col] * x / h_max)), (255, 255, 255), 1)
-# cv2.imshow("Horizontal Projection", horizontal)
-# cv2.imshow("Image", img)
-
-# threshold segmentation
-# gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-# _, img = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
-# # cv2.imshow("Image", img)
 
 # search-based heuristic segmentation
-def segment() :
+def segmentation(img) :
    new_img = np.zeros(img.shape, dtype = "uint8")
    h, w = img.shape[:2]
    threshold = 0.8
@@ -113,39 +71,83 @@ def segment() :
 
    return new_img
 
-new_img = segment()
-cv2.imshow("Segmented Image", new_img)
-img = new_img
 
-# morphological operations
-kernel = np.ones((2,2   ),np.uint8)
+def morphological_closing_and_opening(img) :
+   kernel = np.ones((2,2), np.uint8)
 
-# morphological closing
-img = cv2.dilate(img, kernel, iterations = 1)
-img = cv2.erode(img, kernel, iterations = 1)
+   # morphological closing
+   img = cv2.dilate(img, kernel, iterations = 1)
+   img = cv2.erode(img, kernel, iterations = 1)
 
-# morphological opening
-img = cv2.erode(img, kernel, iterations = 1)
-img = cv2.dilate(img, kernel, iterations = 1)
+   # morphological opening
+   img = cv2.erode(img, kernel, iterations = 1)
+   img = cv2.dilate(img, kernel, iterations = 1)
 
-cv2.imshow("Image after Operation", img)
+   return img
+
 
 # Vertical Image Projection
-v_proj = np.sum(img, 1)
-v_max = np.max(v_proj)
-y = img.shape[1]
-vertical = np.zeros((v_proj.shape[0], y))
-for row in range(img.shape[0]):
-   cv2.line(vertical, (0, row), (int(v_proj[row] * y / v_max), row), (255, 255, 255), 1)
-cv2.imshow("Vertical Projection", vertical)
+def vertical_image_projection(img, threshold) :
+   v_proj = np.sum(img, 1)
+   v_max = np.max(v_proj)
+   y = img.shape[1]
+   vertical = np.zeros((v_proj.shape[0], y))
+   for row in range(img.shape[0]):
+      cv2.line(vertical, (0, row), (int(v_proj[row] * y / v_max), row), (255, 255, 255), 1)
+
+   v_height = vertical.shape[0]
+   for i in range(v_height) :
+      if(int(vertical[i][threshold]) == 255) :
+         y1 = i
+         break
+
+   for j in range(v_height - 1, 1, -1) :
+      if(int(vertical[j][threshold]) == 255) :
+         y2 = j
+         break
+
+   print("Height of the object :", y2-y1)
+   cv2.imshow("Vertical Projection", vertical)
+
 
 # Horizontal Image Projection
-h_proj = np.sum(img, 0)
-h_max = np.max(h_proj)
-x = img.shape[0]
-horizontal = np.zeros((x, h_proj.shape[0]))
-for col in range(img.shape[1]):
-   cv2.line(horizontal, (col, 0), (col, int(h_proj[col] * x / h_max)), (255, 255, 255), 1)
-cv2.imshow("Horizontal Projection", horizontal)
+def horizontal_image_projection(img, threshold) :
+   h_proj = np.sum(img, 0)
+   h_max = np.max(h_proj)
+   x = img.shape[0]
+   horizontal = np.zeros((x, h_proj.shape[0]))
+   for col in range(img.shape[1]):
+      cv2.line(horizontal, (col, 0), (col, int(h_proj[col] * x / h_max)), (255, 255, 255), 1)
+
+   h_width = horizontal.shape[1]
+   for i in range(h_width) :
+      if(int(horizontal[threshold][i]) == 255) :
+         x1 = i
+         break
+
+   for j in range(h_width - 1, 1, -1) :
+      if(int(horizontal[threshold][j]) == 255) :
+         x2 = j
+         break
+
+   print("Width of the object :", x2-x1)
+   cv2.imshow("Horizontal Projection", horizontal)
+
+
+img = grayscale_resize(img)
+
+# show segmented image
+img = segmentation(img)
+cv2.imshow("Segmented Image", img)
+
+# show image after morphological operations
+img = morphological_closing_and_opening(img)
+cv2.imshow("Image after Operation", img)
+
+# projections
+print("Image Dimension : ", img.shape[0], " x ", img.shape[1])
+threshold = 30
+vertical_image_projection(img, threshold)
+horizontal_image_projection(img, threshold)
 
 cv2.waitKey(0)
