@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
  
 # read image
-img = cv2.imread(r"C:\Users\acer\Documents\Thesis\LateralView\Cropped_LV_250.jpg")
+img = cv2.imread(r"C:\Users\acer\Documents\Thesis\LateralView\Cropped_LV_1000.jpg")
 
 
 # resize the image using proportion
@@ -136,34 +136,40 @@ def horizontal_image_projection(img, threshold) :
 
    return x2-x1
 
-   def get_od_scaling_factor() :
-      actual_measurements = np.array([109, 90, 76, 68, 56, 49, 42])
-      pixel_measurements = np.array([423, 356, 331, 299, 251, 225, 176])
-      scaling_factor = 0
+def get_od_scaling_factor() :
+   actual_measurements = np.array([109, 90, 76, 68, 56, 49, 42])
+   pixel_measurements = np.array([423, 356, 331, 299, 251, 225, 176])
+   scaling_factor = 0
 
-      for i in range(0, actual_measurements.size - 1) :
-         scaling_factor += actual_measurements[i] / pixel_measurements[i]
+   for i in range(0, actual_measurements.size - 1) :
+      scaling_factor += actual_measurements[i] / pixel_measurements[i]
 
-      return scaling_factor / actual_measurements[i]
+   return scaling_factor / actual_measurements[i]
 
-   def get_length_scaling_factor() :
-      actual_measurements = np.array([157, 124, 109, 88, 84, 69, 54])
-      pixel_measurements = np.array([541, 432, 430, 345, 319, 273, 221])
-      scaling_factor = 0
+def get_length_scaling_factor() :
+   actual_measurements = np.array([157, 124, 109, 88, 84, 69, 54])
+   pixel_measurements = np.array([541, 432, 430, 345, 319, 273, 221])
+   scaling_factor = 0
 
-      for i in range(0, actual_measurements.size - 1) :
-         scaling_factor += actual_measurements[i] / pixel_measurements[i]
+   for i in range(0, actual_measurements.size - 1) :
+      scaling_factor += actual_measurements[i] / pixel_measurements[i]
 
-      return scaling_factor / actual_measurements[i]
+   return scaling_factor / actual_measurements[i]
 
 img = grayscale_resize(img)
 
 # show segmented image
 img = segmentation(img)
-# cv2.imshow("Segmented Image", img)
+cv2.imshow("Segmented Image", img)
 
 # show image after morphological operations
 img = morphological_closing_and_opening(img)
-# cv2.imshow("Image after Operation", img)
+cv2.imshow("Image after Operation", img)
 
-# cv2.waitKey(0)
+# printing the scaling factors
+# od = get_od_scaling_factor()
+# length = get_length_scaling_factor()
+# print(od)
+# print(length)
+
+cv2.waitKey(0)
