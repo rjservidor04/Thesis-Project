@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
  
 # read image
-img = cv2.imread(r"C:\Users\acer\Documents\Thesis\LateralView\Cropped_LV_100.jpg")
+img = cv2.imread(r"C:\Users\acer\Documents\Thesis\LateralView\Cropped_LV_150.jpg")
 
 
 # resize the image using proportion
@@ -25,8 +25,8 @@ def segmentation(img) :
 
    # for left and right direction, i is for row and j for column
    # left to right
-   for i in range(2, h) :
-      for j in range(2, w) :
+   for i in range(2, h - 1) :
+      for j in range(2, w - 1) :
          if(abs((int(img[i, j]) - int(img[i, j - 1])) / 2) > threshold * abs((int(img[i, j -1]) - int(img[i, j - 2]) / 2))) :
             new_img[i, j] = 255
             new_img[i - 1, j] = 255
@@ -36,7 +36,7 @@ def segmentation(img) :
             break
 
    # right to left
-   for i in range(2, h) :
+   for i in range(2, h - 1) :
       for j in range(w - 2, 2, -1) :
          if(abs((int(img[i, j]) - int(img[i, j - 1])) / 2) > threshold * abs((int(img[i, j -1]) - int(img[i, j - 2]) / 2))) :
             new_img[i, j] = 255
@@ -109,6 +109,8 @@ def vertical_image_projection(img, threshold) :
    print("Height of the object :", y2-y1)
    cv2.imshow("Vertical Projection", vertical)
 
+   return y2-y1
+
 
 # Horizontal Image Projection
 def horizontal_image_projection(img, threshold) :
@@ -133,6 +135,7 @@ def horizontal_image_projection(img, threshold) :
    print("Width of the object :", x2-x1)
    cv2.imshow("Horizontal Projection", horizontal)
 
+   return x2-x1
 
 img = grayscale_resize(img)
 
@@ -147,7 +150,16 @@ cv2.imshow("Image after Operation", img)
 # projections
 print("Image Dimension : ", img.shape[0], " x ", img.shape[1])
 threshold = 30
-vertical_image_projection(img, threshold)
-horizontal_image_projection(img, threshold)
+y = vertical_image_projection(img, threshold)
+x = horizontal_image_projection(img, threshold)
+
+#calculating scaling factor
+actual_diameter = 56
+actual_length = 84
+scaling_factor = ((actual_length / y) + (actual_diameter / x)) / 2;
+
+print("Scaling Factor (pixel to mm): ", scaling_factor)
+print("Height Derived = ", scaling_factor * y)
+print("width Derived = ", scaling_factor * x)
 
 cv2.waitKey(0)
