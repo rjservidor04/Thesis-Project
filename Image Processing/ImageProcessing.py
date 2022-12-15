@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
  
 # read image
-img = cv2.imread(r"C:\Users\acer\Documents\Thesis\LateralView\Cropped_LV_150.jpg")
+img = cv2.imread(r"C:\Users\acer\Documents\Thesis\LateralView\Cropped_LV_250.jpg")
 
 
 # resize the image using proportion
@@ -11,7 +11,7 @@ def grayscale_resize(img) :
    h, w = img.shape[:2]
    new_h, new_w = int(h / 4), int(w / 4)
    img = cv2.resize(img, (new_w, new_h))
-   cv2.imshow("Resized Image", img)
+   # cv2.imshow("Resized Image", img)
    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
    return img
@@ -60,7 +60,7 @@ def segmentation(img) :
 
    # bottom to toi
    for i in range(2, w - 1) :
-      for j in range(2, h) :
+      for j in range(2, h - 1) :
          if(abs((int(img[j, i]) - int(img[j - 1, i])) / 2) > threshold * abs((int(img[j - 1, i]) - int(img[j - 2, i]) / 2))) :
             new_img[j, i] = 255
             new_img[j - 1, i] = 255
@@ -74,14 +74,13 @@ def segmentation(img) :
 
 def morphological_closing_and_opening(img) :
    kernel = np.ones((2,2), np.uint8)
+   # morphological opening
+   img = cv2.erode(img, kernel, iterations = 1)
+   img = cv2.dilate(img, kernel, iterations = 1)
 
    # morphological closing
    img = cv2.dilate(img, kernel, iterations = 1)
    img = cv2.erode(img, kernel, iterations = 1)
-
-   # morphological opening
-   img = cv2.erode(img, kernel, iterations = 1)
-   img = cv2.dilate(img, kernel, iterations = 1)
 
    return img
 
@@ -107,7 +106,7 @@ def vertical_image_projection(img, threshold) :
          break
 
    print("Height of the object :", y2-y1)
-   cv2.imshow("Vertical Projection", vertical)
+   # cv2.imshow("Vertical Projection", vertical)
 
    return y2-y1
 
@@ -133,33 +132,38 @@ def horizontal_image_projection(img, threshold) :
          break
 
    print("Width of the object :", x2-x1)
-   cv2.imshow("Horizontal Projection", horizontal)
+   # cv2.imshow("Horizontal Projection", horizontal)
 
    return x2-x1
+
+   def get_od_scaling_factor() :
+      actual_measurements = np.array([109, 90, 76, 68, 56, 49, 42])
+      pixel_measurements = np.array([423, 356, 331, 299, 251, 225, 176])
+      scaling_factor = 0
+
+      for i in range(0, actual_measurements.size - 1) :
+         scaling_factor += actual_measurements[i] / pixel_measurements[i]
+
+      return scaling_factor / actual_measurements[i]
+
+   def get_length_scaling_factor() :
+      actual_measurements = np.array([157, 124, 109, 88, 84, 69, 54])
+      pixel_measurements = np.array([541, 432, 430, 345, 319, 273, 221])
+      scaling_factor = 0
+
+      for i in range(0, actual_measurements.size - 1) :
+         scaling_factor += actual_measurements[i] / pixel_measurements[i]
+
+      return scaling_factor / actual_measurements[i]
 
 img = grayscale_resize(img)
 
 # show segmented image
 img = segmentation(img)
-cv2.imshow("Segmented Image", img)
+# cv2.imshow("Segmented Image", img)
 
 # show image after morphological operations
 img = morphological_closing_and_opening(img)
-cv2.imshow("Image after Operation", img)
+# cv2.imshow("Image after Operation", img)
 
-# projections
-print("Image Dimension : ", img.shape[0], " x ", img.shape[1])
-threshold = 30
-y = vertical_image_projection(img, threshold)
-x = horizontal_image_projection(img, threshold)
-
-#calculating scaling factor
-actual_diameter = 56
-actual_length = 84
-scaling_factor = ((actual_length / y) + (actual_diameter / x)) / 2;
-
-print("Scaling Factor (pixel to mm): ", scaling_factor)
-print("Height Derived = ", scaling_factor * y)
-print("width Derived = ", scaling_factor * x)
-
-cv2.waitKey(0)
+# cv2.waitKey(0)
