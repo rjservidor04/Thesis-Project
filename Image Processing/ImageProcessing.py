@@ -198,10 +198,10 @@ def processImage(img):
     # display image
     processed_label.destroy()
     processed_label = Label(windows,text="Processed Image", font=('Ariel', 22, 'bold'))
-    processed_label.place(x=(w+(w/2)+100), y=7)
+    processed_label.place(x=(w+(w/2)+225), y=7)
 
     label = Label(windows, image = PIL_img, width=w, height=h)
-    label.place(x=(w+220),y=50)
+    label.place(x=(w+340),y=50)
 
     btnOpenImage = Button(windows, text="Open file", width=12, command=openDialog)
     txt_height =  str(f_height) + " mm"
@@ -210,15 +210,15 @@ def processImage(img):
     # actual_d = "Actual Diameter: " + str(245)
 
     canvas.delete("all") 
-    canvas = Canvas(windows, height=600, width=450)
-    canvas.place(x=w-30, y=h+80)
-    canvas.create_rectangle(5, 5, 350, 150, outline='black')
-    canvas.create_text(170,20, text="Report", font=('Ariel', 18, 'bold'))
+    canvas = Canvas(windows, height=150, width=200)
+    canvas.place(x=20, y=133)
+    canvas.create_rectangle(5, 5, 200, 150, outline='black')
+    canvas.create_text(100,20, text="Report", font=('Ariel', 18, 'bold'))
 
-    canvas.create_text(56, 60, text="Height: ", font=('Ariel', 14 ))
-    canvas.create_text(123, 60, text=txt_height, font=('Ariel', 14 ))
-    canvas.create_text(65, 80, text="Diameter: ", font=('Ariel', 14 ))
-    canvas.create_text(143, 80, text=txt_diameter, font=('Ariel', 14 ))
+    canvas.create_text(51, 60, text="Height: ", font=('Ariel', 12))
+    canvas.create_text(100, 60, text=txt_height, font=('Ariel', 12 ))
+    canvas.create_text(60, 80, text="Diameter: ", font=('Ariel', 12 ))
+    canvas.create_text(120, 80, text=txt_diameter, font=('Ariel', 12 ))
    
 
 def openDialog():
@@ -230,6 +230,7 @@ def openDialog():
     global captured_label
     global processed_label
     global label
+
     address = filedialog.askopenfilename(initialdir="/Users/Rd/dev/thesis/Images/", title="Select file", 
     filetypes= (("Images", ("*.jpg", "*.png", "*.bmp")), ("All Items", "*.*")))
 
@@ -245,10 +246,10 @@ def openDialog():
     processed_label.destroy()
 
     captured_label = Label(windows,text="Captured Image", font=('Ariel', 22, 'bold'))
-    captured_label.place(x=((new_w/2)+40), y=7)
+    captured_label.place(x=((new_w/2)+140), y=7)
   
     label = Label(windows, image = image, width=(w/4), height=(h/4))
-    label.place(x=150,y=50)
+    label.place(x=250,y=50)
 
     btnProcessImage.config(state = NORMAL)
     btnProcessImage = Button(windows, text="Process Image", width=12, command=lambda: processImage(image), state=NORMAL)
@@ -263,14 +264,14 @@ windows.geometry("900x1300")
 # initializing elements inside the windows
 captured_label = Label(windows,text="Captured Image", font=('Ariel', 22, 'bold'), fg='white')
 processed_label = Label(windows,text="Processed Image", font=('Ariel', 22, 'bold'), fg='white')
-canvas = Canvas(windows, height=600, width=450)
-# label = Label(windows)
+canvas = Canvas(windows, height=400, width=200)
+label = Label(windows)
 
 btnOpenImage = Button(windows, text="Open file", width=12, command=openDialog)
-btnOpenImage.place(x=40,y=90)
+btnOpenImage.place(x=70,y=60)
 
 btnProcessImage = Button(windows, text="Process Image", width=12, command=lambda: processImage(image), state=DISABLED)
-btnProcessImage.place(x=40,y=130)
+btnProcessImage.place(x=70,y=95)
 
 
 windows.mainloop()
