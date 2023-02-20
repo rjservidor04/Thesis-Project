@@ -1,0 +1,6 @@
+#accept and reject
+#volume type
+#new beakers?
+#defects (pwede ra cguro bottles)
+
+#ui
