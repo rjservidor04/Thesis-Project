@@ -5,6 +5,68 @@ def to_grayscale(img) :
    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
    return img
+def get_ROI(image):
+
+   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+   image_to_process = gray
+
+   last_row = image.shape[1]-1
+   last_col = image.shape[0]-1
+
+   upper_left = (1,1)
+   flag = False
+
+   # finding the pout at upper-left
+   for x in range(0, last_row):
+      for y in range(0, last_col):
+
+         if(image_to_process[y,x] > 180):
+            flag = True
+            upper_left = (x,y) # pout location
+            break
+
+      if(flag): # exit outer loop
+         break
+
+   # getting the LOWER-RIGHT pixel
+
+   flag = False
+   lower_right = (0,0)
+   x, y = 0, 0
+
+   # assumed limit based on upper left
+   x_limit = upper_left[1]
+   y_limit = upper_left[0] + 100
+
+   # to find x in lower-right: 
+   for x in range(last_row, 2, -1):
+      if(image_to_process[x_limit, x] > 180):
+         break
+
+   # to find y in lower-right:
+   for y in range(last_col, 2, -1):
+      if(image_to_process[y, y_limit] > 180):
+         break
+
+   lower_right = (x,y)
+
+
+   radius = 3
+   color = (255, 0, 0)  # BGR color (red)
+   thickness = -1  # Fill the circle
+
+   ROI = image_to_process
+
+   # adding margins 
+   x1 = upper_left[0] - 30
+   y1 = upper_left[1] - 30
+
+   x2 = lower_right[0] + 30
+   y2 = lower_right[1] + 30
+
+   ROI = image_to_process[y1:y2, x1:x2]
+
+   return ROI
 
 # search-based heuristic segmentation
 def segmentation(img) :
