@@ -3,13 +3,13 @@
   <object class="tk.Toplevel" id="top" named="True">
     <property name="height">800</property>
     <property name="overrideredirect">False</property>
-    <property name="resizable">none</property>
+    <property name="resizable">both</property>
     <property name="title" translatable="yes">Automatic Dimensional Measurement of Griffin Beakers using Machine Vision</property>
     <property name="width">800</property>
     <child>
       <object class="ttk.Frame" id="frame_main" named="True">
         <property name="height">660</property>
-        <property name="width">800</property>
+        <property name="width">1200</property>
         <layout manager="grid">
           <property name="column">0</property>
           <property name="row">0</property>
@@ -27,7 +27,7 @@
               <property name="padx">50 0</property>
               <property name="pady">100 0</property>
               <property name="row">2</property>
-              <property name="sticky">n</property>
+              <property name="sticky">nw</property>
             </layout>
             <child>
               <object class="ttk.Button" id="btn_load_image" named="True">
@@ -60,8 +60,8 @@
         </child>
         <child>
           <object class="ttk.Frame" id="frame_images" named="True">
-            <property name="height">800</property>
-            <property name="width">800</property>
+            <property name="height">0</property>
+            <property name="width">0</property>
             <layout manager="grid">
               <property name="column">1</property>
               <property name="padx">100</property>
@@ -70,17 +70,25 @@
             </layout>
             <child>
               <object class="tk.Canvas" id="cnv_loaded_image" named="True">
-                <layout manager="pack">
-                  <property name="pady">20</property>
-                  <property name="side">top</property>
+                <property name="height">600</property>
+                <property name="width">400</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="padx">0 40</property>
+                  <property name="pady">40 0</property>
+                  <property name="row">0</property>
                 </layout>
               </object>
             </child>
             <child>
               <object class="tk.Canvas" id="cnv_processed_image" named="True">
-                <layout manager="pack">
-                  <property name="pady">20</property>
-                  <property name="side">top</property>
+                <property name="height">600</property>
+                <property name="width">400</property>
+                <layout manager="grid">
+                  <property name="column">1</property>
+                  <property name="padx">0 40</property>
+                  <property name="pady">40 0</property>
+                  <property name="row">0</property>
                 </layout>
               </object>
             </child>
@@ -95,6 +103,7 @@
               <property name="padx">40 0</property>
               <property name="pady">50 0</property>
               <property name="row">2</property>
+              <property name="sticky">w</property>
             </layout>
             <child>
               <object class="ttk.Label" id="lbl_report_title" named="True">
@@ -109,7 +118,7 @@
             </child>
             <child>
               <object class="ttk.Label" id="lbl_height" named="True">
-                <property name="text" translatable="yes">Height:</property>
+                <property name="text" translatable="yes">Length:</property>
                 <layout manager="grid">
                   <property name="column">0</property>
                   <property name="pady">20 5</property>
@@ -119,9 +128,9 @@
               </object>
             </child>
             <child>
-              <object class="ttk.Label" id="lbl_acquired_height" named="True">
+              <object class="ttk.Label" id="lbl_acquired_length" named="True">
                 <property name="state">disabled</property>
-                <property name="text" translatable="yes">&lt;height&gt;</property>
+                <property name="text" translatable="yes">&lt;length&gt;</property>
                 <layout manager="grid">
                   <property name="column">1</property>
                   <property name="padx">20 0</property>

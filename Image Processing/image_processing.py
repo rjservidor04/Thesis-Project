@@ -135,8 +135,6 @@ def morphological_closing_and_opening(img) :
 def vertical_image_projection(img, threshold) :
    v_proj = np.sum(img, 1)
    v_max = np.max(v_proj)
-   y2 = 0
-   y1 = 0
    y = img.shape[1]
    vertical = np.zeros((v_proj.shape[0], y))
    for row in range(img.shape[0]):
@@ -206,7 +204,7 @@ def get_length_scaling_factor() :
 
    return scaling_factor / actual_measurements[i]
 
-def report_generation(length, od) :
+def identify_volume(length, od) :
    if(39 <= od <= 43 and length <= 60) :
       return "50"
    
