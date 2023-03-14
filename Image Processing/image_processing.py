@@ -1,12 +1,7 @@
 import cv2
 import numpy as np
- 
-def to_grayscale(img) :
-   img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-   return img
 def get_ROI(image):
-
    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
    image_to_process = gray
 
@@ -210,3 +205,28 @@ def get_length_scaling_factor() :
       scaling_factor += actual_measurements[i] / pixel_measurements[i]
 
    return scaling_factor / actual_measurements[i]
+
+def report_generation(length, od) :
+   if(39 <= od <= 43 and length <= 60) :
+      return "50"
+   
+   elif(48 <= od <= 52 and length <=75) :
+      return "100"
+   
+   elif(55 <= od <= 59 and length <= 90) :
+      return "150"
+   
+   elif(66 <= od <= 70 and length <= 100) :
+      return "250"
+   
+   elif(75 <= od <= 79 and length <= 120) :
+      return "400"
+   
+   elif(85 <= od <= 91 and length <= 135) :
+      return "600"
+   
+   elif(105 <= od <= 111 and length <= 160) :
+      return "1000"
+   
+   else :
+      return "Defective"
