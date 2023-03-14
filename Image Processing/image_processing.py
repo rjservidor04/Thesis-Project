@@ -2,71 +2,18 @@ import cv2
 import numpy as np
 
 def get_ROI(image):
-   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-   image_to_process = gray
+   h, w = image.size
+   new_h, new_w = int(h / 4), int(w / 4)
+   img = np.asarray(image)
+   img = cv2.resize(img, (new_w, new_h))
 
-   last_row = image.shape[1]-1
-   last_col = image.shape[0]-1
-
-   upper_left = (1,1)
-   flag = False
-
-   # finding the pout at upper-left
-   for x in range(0, last_row):
-      for y in range(0, last_col):
-
-         if(image_to_process[y,x] > 180):
-            flag = True
-            upper_left = (x,y) # pout location
-            break
-
-      if(flag): # exit outer loop
-         break
-
-   # getting the LOWER-RIGHT pixel
-
-   flag = False
-   lower_right = (0,0)
-   x, y = 0, 0
-
-   # assumed limit based on upper left
-   x_limit = upper_left[1]
-   y_limit = upper_left[0] + 100
-
-   # to find x in lower-right: 
-   for x in range(last_row, 2, -1):
-      if(image_to_process[x_limit, x] > 180):
-         break
-
-   # to find y in lower-right:
-   for y in range(last_col, 2, -1):
-      if(image_to_process[y, y_limit] > 180):
-         break
-
-   lower_right = (x,y)
-
-
-   radius = 3
-   color = (255, 0, 0)  # BGR color (red)
-   thickness = -1  # Fill the circle
-
-   ROI = image_to_process
-
-   # adding margins 
-   x1 = upper_left[0] - 30
-   y1 = upper_left[1] - 30
-
-   x2 = lower_right[0] + 30
-   y2 = lower_right[1] + 30
-
-   ROI = image_to_process[y1:y2, x1:x2]
-
-   return ROI
+   return img
 
 # search-based heuristic segmentation
-def segmentation(img) :
+def segmentation(image) :
+   img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
    new_img = np.zeros(img.shape, dtype = "uint8")
-   h, w = img.shape[:2]
+   h, w = new_img.shape[:2]
    threshold = 0.8
 
    # for left and right direction, i is for row and j for column
@@ -151,8 +98,6 @@ def vertical_image_projection(img, threshold) :
          y2 = j
          break
 
-   print("Height of the object :", y2-y1)
-
    return y2-y1
 
 
@@ -163,8 +108,6 @@ def horizontal_image_projection(img, threshold) :
    x = img.shape[0]
    horizontal = np.zeros((x, h_proj.shape[0]))
 
-   x2 = 0
-   x1 = 0
    for col in range(img.shape[1]):
       cv2.line(horizontal, (col, 0), (col, int(h_proj[col] * x / h_max)), (255, 255, 255), 1)
 
@@ -179,30 +122,27 @@ def horizontal_image_projection(img, threshold) :
          x2 = j
          break
 
-   print("Width of the object :", x2-x1)
-
    return x2-x1
 
 def get_od_scaling_factor() :
    actual_measurements = np.array([109, 90, 76, 68, 56, 49, 42])
    pixel_measurements = np.array([423, 356, 331, 299, 251, 225, 176])
    scaling_factor = 0
-   i=0
 
    for i in range(0, actual_measurements.size - 1) :
       scaling_factor += actual_measurements[i] / pixel_measurements[i]
 
-   return scaling_factor / actual_measurements[i]
+   return (scaling_factor / actual_measurements.size)
 
 def get_length_scaling_factor() :
    actual_measurements = np.array([157, 124, 109, 88, 84, 69, 54])
    pixel_measurements = np.array([541, 432, 430, 345, 319, 273, 221])
    scaling_factor = 0
-   i=0
+
    for i in range(0, actual_measurements.size - 1) :
       scaling_factor += actual_measurements[i] / pixel_measurements[i]
 
-   return scaling_factor / actual_measurements[i]
+   return scaling_factor / actual_measurements.size
 
 def identify_volume(length, od) :
    if(39 <= od <= 43 and length <= 60) :

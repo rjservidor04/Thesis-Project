@@ -101,7 +101,7 @@
             <layout manager="grid">
               <property name="column">0</property>
               <property name="padx">40 0</property>
-              <property name="pady">50 0</property>
+              <property name="pady">100 0</property>
               <property name="row">2</property>
               <property name="sticky">w</property>
             </layout>

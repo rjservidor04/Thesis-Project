@@ -10,6 +10,8 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "thesis_gui.ui"
 
 class ThesisGuiApp:
+    global img
+
     def __init__(self, master=None):
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
@@ -34,41 +36,43 @@ class ThesisGuiApp:
         address = filedialog.askopenfilename(title="Select file", 
         filetypes= (("Images", ("*.jpg", "*.png", "*.bmp")), ("All Items", "*.*")))
         img = Image.open(address)
-        w, h = img.size
-        new_w, new_h = int(w/2), int(h/2)
-        img = img.resize((new_w, new_h))
-        self.loaded_image = ImageTk.PhotoImage(img)
-
+        self.loaded_image = ip.get_ROI(img)
+        
         # display image
-        self.cnv_loaded_image.config(width = new_w, height = new_h)
-        self.cnv_loaded_image.create_image(0, 0, image = self.loaded_image, anchor = "nw")
+        w, h = self.loaded_image.shape[:2]
+        self.cnv_loaded_image.config(width = w + 50, height = h + 50)
+        self.loaded_image_to_display = Image.fromarray(self.loaded_image)
+        self.loaded_image_to_display = ImageTk.PhotoImage(self.loaded_image_to_display)
+        self.cnv_loaded_image.create_image(0, 0, image = self.loaded_image_to_display, anchor = "nw")
 
         # activate process image button
         self.btn_process_image.configure(state = "normal")
 
     def btn_process_image_clicked(self):
         # process loaded image
-        arr = ip.np.asarray(self.loaded_image)
-        self.processed_image = ip.get_ROI(arr)
-        self.processed_image = ip.segmentation(self.processed_image)
-        self.processed_image = ip.morphological_closing_and_opening(self.processed_image)
+        processed_image = ip.segmentation(self.loaded_image)
+        processed_image = ip.morphological_closing_and_opening(processed_image)
         
         # display processed image
-        self.cnv_processed_image.create_image(0, 0, image = self.processed_image, anchor = "nw")
+        w, h = processed_image.shape[:2]
+        self.cnv_processed_image.config(width = w + 50, height = h + 50)
+        self.processed_image_to_display = Image.fromarray(processed_image)
+        self.processed_image_to_display = ImageTk.PhotoImage(self.processed_image_to_display)
+        self.cnv_processed_image.create_image(0, 0, image = self.processed_image_to_display, anchor = "nw")
 
         # getting the image length
-        px_length = ip.vertical_image_projection(self.processed_image, threshold = 50)
+        px_length = ip.horizontal_image_projection(processed_image, threshold = 20)
         length_scaling_factor = ip.get_length_scaling_factor()
-        actual_length = round(px_length * length_scaling_factor, 2)
+        actual_length = int(length_scaling_factor * px_length)
 
         # getting the image outer diameter
-        px_od = ip.horizontal_image_projection(self.processed_image, threshold = 50)
+        px_od = ip.vertical_image_projection(processed_image, threshold = 20)
         od_scaling_factor = ip.get_od_scaling_factor()
-        actual_od = round(px_od * od_scaling_factor, 2)
+        actual_od = int(od_scaling_factor * px_od)
 
         # report generation
-        self.lbl_acquired_length.configure(state = "normal", text = "" + actual_length)
-        self.lbl_acquired_outer_diameter(state = "normal", text = "" + actual_od)
+        self.lbl_acquired_length.configure(state = "normal", text = actual_length)
+        self.lbl_acquired_outer_diameter.configure(state = "normal", text = actual_od)
 
 
 if __name__ == "__main__":
