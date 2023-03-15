@@ -4,10 +4,103 @@ import numpy as np
 def get_ROI(image):
    h, w = image.size
    new_h, new_w = int(h / 4), int(w / 4)
+
    img = np.asarray(image)
    img = cv2.resize(img, (new_h, new_w))
+   gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+   
+   image_to_process = gray
 
-   return img
+   last_row = img.shape[1]-1
+   last_col = img.shape[0]-1
+
+   # print("Dimensions: col x row")
+   # print(img.shape)
+      
+   upper_left = (1,1)
+   flag = False
+
+   # finding the pout at upper-left
+   for x in range(0, last_row):
+      for y in range(0, last_col):
+
+         if(image_to_process[y,x] > 180):
+               flag = True
+               upper_left = (x,y) # pout location
+               break
+
+      if(flag): # exit outer loop
+         break
+
+
+   # getting the LOWER-RIGHT pixel
+   flag = False
+   lower_right = (0,0)
+   x, y = 0, 0
+
+   # assumed limit based on upper left
+   x_limit = upper_left[1]
+   y_limit = upper_left[0] + 150
+
+   # to find x in lower-right: 
+   for x in range(last_row, 2, -1):
+      if(image_to_process[x_limit, x] > 160 or image_to_process[x_limit+1, x] > 160 or image_to_process[x_limit-1, x] > 160 ):
+         break
+
+   # to find y in lower-right:
+   for y in range(last_col, 2, -1):
+      if(image_to_process[y, y_limit] > 180 or image_to_process[y, y_limit+1] > 180 or image_to_process[y, y_limit-1] > 180) :
+         break
+
+   lower_right = (x,y)
+
+   radius = 3
+   color = (255, 0, 0)  # BGR color (red)
+   thickness = -1  # Fill the circle
+
+   ROI = image_to_process
+      
+   x1 = 1   
+   y1 = 1
+   x2 = last_row 
+   y2 = last_col
+
+   # adding margins 
+   if(upper_left[0] > 50):
+      x1 = upper_left[0] - 50 
+      # print("Upperleft X")
+
+   if(upper_left[1] > 60):
+      y1 = upper_left[1] - 60
+      # print("Upperleft Y")
+
+   if(lower_right[0]+50 <= last_row):
+      x2 = lower_right[0] + 50
+      # print("Lowerright X")
+      
+   if(lower_right[1]+30 <= last_col): 
+      y2 = lower_right[1] + 30
+      # print("Lowerright Y")
+
+   # print("Upper left: " + str(upper_left))
+   # print("Lower right: " + str(lower_right))
+   # print("X1, Y1: (" + str(x1) + ", " + str(y1)+")")
+   # print("X2, Y2: (" + str(x2) + ", " + str(y2) +")")
+
+   ROI = image_to_process[y1:y2, x1:x2]
+   # cv2.circle(image_to_process, upper_left, radius, color, thickness)
+   # cv2.circle(image_to_process, lower_right, radius, color, thickness)
+
+   # cv2.circle(image_to_process, (last_row, x_limit), radius, color, thickness) # for y
+   # cv2.circle(image_to_process, (y_limit, last_col), radius, color, thickness) # for x
+   # cv2.circle(image_to_process, (lower_right[0], x_limit), radius, color, thickness) # for y
+   # cv2.circle(image_to_process, (y_limit, lower_right[1]), radius, color, thickness) # for x
+
+   # Show the image with the marked point
+   # cv2.imshow('Image', image_to_process)
+   
+   # return img
+   return ROI
 
 # search-based heuristic segmentation
 def segmentation(image) :
