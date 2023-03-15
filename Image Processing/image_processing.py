@@ -5,7 +5,7 @@ def get_ROI(image):
    h, w = image.size
    new_h, new_w = int(h / 4), int(w / 4)
    img = np.asarray(image)
-   img = cv2.resize(img, (new_w, new_h))
+   img = cv2.resize(img, (new_h, new_w))
 
    return img
 
@@ -64,9 +64,8 @@ def segmentation(image) :
 
    return new_img
 
-
 def morphological_closing_and_opening(img) :
-   kernel = np.ones((2,2), np.uint8)
+   kernel = np.ones((2, 2), np.uint8)
    # morphological opening
    img = cv2.erode(img, kernel, iterations = 1)
    img = cv2.dilate(img, kernel, iterations = 1)
@@ -78,7 +77,7 @@ def morphological_closing_and_opening(img) :
    return img
 
 
-# Vertical Image Projection
+# Vertical Image Projection for Length
 def vertical_image_projection(img, threshold) :
    v_proj = np.sum(img, 1)
    v_max = np.max(v_proj)
@@ -86,6 +85,8 @@ def vertical_image_projection(img, threshold) :
    vertical = np.zeros((v_proj.shape[0], y))
    for row in range(img.shape[0]):
       cv2.line(vertical, (0, row), (int(v_proj[row] * y / v_max), row), (255, 255, 255), 1)
+
+   # cv2.imshow("Vertical Projection", vertical)
 
    v_height = vertical.shape[0]
    for i in range(v_height) :
@@ -100,8 +101,7 @@ def vertical_image_projection(img, threshold) :
 
    return y2-y1
 
-
-# Horizontal Image Projection
+# Horizontal Image Projection for OD
 def horizontal_image_projection(img, threshold) :
    h_proj = np.sum(img, 0)
    h_max = np.max(h_proj)
@@ -110,6 +110,8 @@ def horizontal_image_projection(img, threshold) :
 
    for col in range(img.shape[1]):
       cv2.line(horizontal, (col, 0), (col, int(h_proj[col] * x / h_max)), (255, 255, 255), 1)
+
+   # cv2.imshow("Horizontal Projection", horizontal)
 
    h_width = horizontal.shape[1]
    for i in range(h_width) :
@@ -121,50 +123,52 @@ def horizontal_image_projection(img, threshold) :
       if(int(horizontal[threshold][j]) == 255) :
          x2 = j
          break
-
+   
    return x2-x1
-
-def get_od_scaling_factor() :
-   actual_measurements = np.array([109, 90, 76, 68, 56, 49, 42])
-   pixel_measurements = np.array([423, 356, 331, 299, 251, 225, 176])
-   scaling_factor = 0
-
-   for i in range(0, actual_measurements.size - 1) :
-      scaling_factor += actual_measurements[i] / pixel_measurements[i]
-
-   return (scaling_factor / actual_measurements.size)
 
 def get_length_scaling_factor() :
    actual_measurements = np.array([157, 124, 109, 88, 84, 69, 54])
    pixel_measurements = np.array([541, 432, 430, 345, 319, 273, 221])
+
    scaling_factor = 0
 
    for i in range(0, actual_measurements.size - 1) :
       scaling_factor += actual_measurements[i] / pixel_measurements[i]
 
-   return scaling_factor / actual_measurements.size
+   return (scaling_factor / actual_measurements.size) +0.03
+
+def get_od_scaling_factor() :
+   actual_measurements = np.array([109, 90, 76, 68, 56, 49, 42])
+   pixel_measurements = np.array([423, 356, 331, 299, 251, 225, 176])
+
+   scaling_factor = 0
+
+   for i in range(0, actual_measurements.size - 1) :
+      scaling_factor += actual_measurements[i] / pixel_measurements[i]
+
+   return (scaling_factor / actual_measurements.size) +0.0355
 
 def identify_volume(length, od) :
    if(39 <= od <= 43 and length <= 60) :
-      return "50"
+      return "50mL"
    
    elif(48 <= od <= 52 and length <=75) :
-      return "100"
+      return "100mL"
    
    elif(55 <= od <= 59 and length <= 90) :
-      return "150"
+      return "150mL"
    
    elif(66 <= od <= 70 and length <= 100) :
-      return "250"
+      return "250mL"
    
    elif(75 <= od <= 79 and length <= 120) :
-      return "400"
+      return "400mL"
    
    elif(85 <= od <= 91 and length <= 135) :
-      return "600"
+      return "600mL"
    
    elif(105 <= od <= 111 and length <= 160) :
-      return "1000"
+      return "1L"
    
    else :
       return "Defective"

@@ -1,8 +1,8 @@
 # !/usr/bin/python3
-import image_processing as ip
 import pathlib
 import pygubu
-import tkinter as tk
+import math
+import image_processing as ip
 from tkinter import filedialog
 from PIL import Image, ImageTk
 
@@ -10,8 +10,6 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "thesis_gui.ui"
 
 class ThesisGuiApp:
-    global img
-
     def __init__(self, master=None):
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
@@ -39,6 +37,7 @@ class ThesisGuiApp:
         self.loaded_image = ip.get_ROI(img)
         
         # display image
+        # ip.cv2.imshow("Loaded Image", self.loaded_image);
         w, h = self.loaded_image.shape[:2]
         self.cnv_loaded_image.config(width = w + 50, height = h + 50)
         self.loaded_image_to_display = Image.fromarray(self.loaded_image)
@@ -52,8 +51,9 @@ class ThesisGuiApp:
         # process loaded image
         processed_image = ip.segmentation(self.loaded_image)
         processed_image = ip.morphological_closing_and_opening(processed_image)
-        
+
         # display processed image
+        # ip.cv2.imshow("Processed Image", processed_image)
         w, h = processed_image.shape[:2]
         self.cnv_processed_image.config(width = w + 50, height = h + 50)
         self.processed_image_to_display = Image.fromarray(processed_image)
@@ -61,19 +61,19 @@ class ThesisGuiApp:
         self.cnv_processed_image.create_image(0, 0, image = self.processed_image_to_display, anchor = "nw")
 
         # getting the image length
-        px_length = ip.horizontal_image_projection(processed_image, threshold = 20)
+        px_length = ip.vertical_image_projection(processed_image, threshold = 30)
         length_scaling_factor = ip.get_length_scaling_factor()
-        actual_length = int(length_scaling_factor * px_length)
+        actual_length = math.floor(length_scaling_factor * px_length)
 
         # getting the image outer diameter
-        px_od = ip.vertical_image_projection(processed_image, threshold = 20)
+        px_od = ip.horizontal_image_projection(processed_image, threshold = 30)
         od_scaling_factor = ip.get_od_scaling_factor()
-        actual_od = int(od_scaling_factor * px_od)
+        actual_od = math.floor(od_scaling_factor * px_od)
 
         # report generation
         self.lbl_acquired_length.configure(state = "normal", text = actual_length)
         self.lbl_acquired_outer_diameter.configure(state = "normal", text = actual_od)
-
+        self.lbl_acquired_volume.configure(state = "normal", text = ip.identify_volume(length = actual_length, od = actual_od))
 
 if __name__ == "__main__":
     app = ThesisGuiApp()
