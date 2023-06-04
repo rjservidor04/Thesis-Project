@@ -1,114 +1,80 @@
 import cv2
 import numpy as np
+from PIL import Image, ImageTk
+
+CONST_ODSCALING = 0.36 #before 0.23
+CONST_HSCALING = 0.32 #before 0.2
 
 def get_ROI(image):
-   h, w = image.size
-   new_h, new_w = int(h / 4), int(w / 4)
+   #preprocessing
+   last_row = image.shape[1]-1
+   last_col = image.shape[0]-1
+   image_to_process = image
 
-   img = np.asarray(image)
-   img = cv2.resize(img, (new_h, new_w))
-   gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-   
-   image_to_process = gray
-
-   last_row = img.shape[1]-1
-   last_col = img.shape[0]-1
-
-   # print("Dimensions: col x row")
-   # print(img.shape)
-      
+   # getting upper left
    upper_left = (1,1)
    flag = False
 
-   # finding the pout at upper-left
-   for x in range(0, last_row):
-      for y in range(0, last_col):
+   mid_col = int(last_col/2)
+   mid_row = int(last_row/2)
+   LR_three4ths_col = int(last_col/4)
+   UL_three4ths_col = int(last_col * 0.75)
 
-         if(image_to_process[y,x] > 180):
+   for x in range(0, mid_row):
+      for y in range(0, UL_three4ths_col):
+         if(image_to_process[y,x] > 160):
+               upper_left = (x,y)
                flag = True
-               upper_left = (x,y) # pout location
                break
-
-      if(flag): # exit outer loop
+      if(flag):
          break
 
-
-   # getting the LOWER-RIGHT pixel
-   flag = False
+   # getting lower right X
    lower_right = (0,0)
-   x, y = 0, 0
+   flag = False
 
-   # assumed limit based on upper left
-   x_limit = upper_left[1]
-   y_limit = upper_left[0] + 150
-
-   # to find x in lower-right: 
-   for x in range(last_row, 2, -1):
-      if(image_to_process[x_limit, x] > 160 or image_to_process[x_limit+1, x] > 160 or image_to_process[x_limit-1, x] > 160 ):
+   for x in range(last_row-2, mid_row, -1):
+      for y in range(last_col-2, LR_three4ths_col, -1):
+         if(image_to_process[y,x] > 110):
+               lower_right = (x, 0)
+               upper_left = (upper_left[0], y)
+               flag = True
+               break
+      if(flag):
          break
 
-   # to find y in lower-right:
-   for y in range(last_col, 2, -1):
-      if(image_to_process[y, y_limit] > 180 or image_to_process[y, y_limit+1] > 180 or image_to_process[y, y_limit-1] > 180) :
+   flag = False
+
+   # gets the right Y for lower right
+   for x in range(last_col-2, mid_col, -1):
+      for y in range(last_row-2, mid_row, -1):
+         if(image_to_process[x,y] > 160):
+               lower_right = (lower_right[0], x)
+               flag = True
+               break
+      
+      if(flag):
          break
 
-   lower_right = (x,y)
+   x1 = upper_left[0] - 30
+   x2 = lower_right[0] + 25
 
-   radius = 3
-   color = (255, 0, 0)  # BGR color (red)
-   thickness = -1  # Fill the circle
-
-   ROI = image_to_process
-      
-   x1 = 1   
-   y1 = 1
-   x2 = last_row 
-   y2 = last_col
-
-   # adding margins 
-   if(upper_left[0] > 50):
-      x1 = upper_left[0] - 50 
-      # print("Upperleft X")
-
-   if(upper_left[1] > 60):
-      y1 = upper_left[1] - 60
-      # print("Upperleft Y")
-
-   if(lower_right[0]+50 <= last_row):
-      x2 = lower_right[0] + 50
-      # print("Lowerright X")
-      
-   if(lower_right[1]+30 <= last_col): 
-      y2 = lower_right[1] + 30
-      # print("Lowerright Y")
-
-   # print("Upper left: " + str(upper_left))
-   # print("Lower right: " + str(lower_right))
-   # print("X1, Y1: (" + str(x1) + ", " + str(y1)+")")
-   # print("X2, Y2: (" + str(x2) + ", " + str(y2) +")")
+   y1 = upper_left[1] - 25
+   y2 = lower_right[1] + 20
 
    ROI = image_to_process[y1:y2, x1:x2]
-   # cv2.circle(image_to_process, upper_left, radius, color, thickness)
-   # cv2.circle(image_to_process, lower_right, radius, color, thickness)
-
-   # cv2.circle(image_to_process, (last_row, x_limit), radius, color, thickness) # for y
-   # cv2.circle(image_to_process, (y_limit, last_col), radius, color, thickness) # for x
-   # cv2.circle(image_to_process, (lower_right[0], x_limit), radius, color, thickness) # for y
-   # cv2.circle(image_to_process, (y_limit, lower_right[1]), radius, color, thickness) # for x
-
-   # Show the image with the marked point
-   # cv2.imshow('Image', image_to_process)
    
    # return img
    return ROI
 
 # search-based heuristic segmentation
 def segmentation(image) :
-   img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-   new_img = np.zeros(img.shape, dtype = "uint8")
+   # image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+   new_img = np.zeros(image.shape, dtype = "uint8")
    h, w = new_img.shape[:2]
-   threshold = 0.8
-
+   threshold = 2
+   img = image
+   
    # for left and right direction, i is for row and j for column
    # left to right
    for i in range(2, h - 1) :
@@ -154,10 +120,14 @@ def segmentation(image) :
             new_img[j, i - 1] = 255
             new_img[j, i + 1] = 255
             break
+   
+   # display segmented image
+   cv2.imshow("Segmented Image", new_img)
 
    return new_img
 
-def morphological_closing_and_opening(img) :
+def morphological_closing_and_opening(image) :
+   img = image
    kernel = np.ones((2, 2), np.uint8)
    # morphological opening
    img = cv2.erode(img, kernel, iterations = 1)
@@ -167,11 +137,16 @@ def morphological_closing_and_opening(img) :
    img = cv2.dilate(img, kernel, iterations = 1)
    img = cv2.erode(img, kernel, iterations = 1)
 
+   # display post processed image
+   # cv2.imshow("Post Processing Image", img)
+
    return img
 
 
 # Vertical Image Projection for Length
-def vertical_image_projection(img, threshold) :
+def vertical_image_projection(image) :
+   img = image
+   threshold = 40
    v_proj = np.sum(img, 1)
    v_max = np.max(v_proj)
    y = img.shape[1]
@@ -179,7 +154,7 @@ def vertical_image_projection(img, threshold) :
    for row in range(img.shape[0]):
       cv2.line(vertical, (0, row), (int(v_proj[row] * y / v_max), row), (255, 255, 255), 1)
 
-   # cv2.imshow("Vertical Projection", vertical)
+   cv2.imshow("Vertical Projection", vertical)
 
    v_height = vertical.shape[0]
    for i in range(v_height) :
@@ -191,11 +166,15 @@ def vertical_image_projection(img, threshold) :
       if(int(vertical[j][threshold]) == 255) :
          y2 = j
          break
-
-   return y2-y1
+   
+   result = y2-y1
+   # print(result)
+   return result
 
 # Horizontal Image Projection for OD
-def horizontal_image_projection(img, threshold) :
+def horizontal_image_projection(image) :
+   img = image
+   threshold = 110
    h_proj = np.sum(img, 0)
    h_max = np.max(h_proj)
    x = img.shape[0]
@@ -204,7 +183,7 @@ def horizontal_image_projection(img, threshold) :
    for col in range(img.shape[1]):
       cv2.line(horizontal, (col, 0), (col, int(h_proj[col] * x / h_max)), (255, 255, 255), 1)
 
-   # cv2.imshow("Horizontal Projection", horizontal)
+   cv2.imshow("Horizontal Projection", horizontal)
 
    h_width = horizontal.shape[1]
    for i in range(h_width) :
@@ -216,30 +195,10 @@ def horizontal_image_projection(img, threshold) :
       if(int(horizontal[threshold][j]) == 255) :
          x2 = j
          break
-   
+
+   result = x2- x1
+   # print(result)
    return x2-x1
-
-def get_length_scaling_factor() :
-   actual_measurements = np.array([157, 124, 109, 88, 84, 69, 54])
-   pixel_measurements = np.array([541, 432, 430, 345, 319, 273, 221])
-
-   scaling_factor = 0
-
-   for i in range(0, actual_measurements.size - 1) :
-      scaling_factor += actual_measurements[i] / pixel_measurements[i]
-
-   return (scaling_factor / actual_measurements.size) +0.03
-
-def get_od_scaling_factor() :
-   actual_measurements = np.array([109, 90, 76, 68, 56, 49, 42])
-   pixel_measurements = np.array([423, 356, 331, 299, 251, 225, 176])
-
-   scaling_factor = 0
-
-   for i in range(0, actual_measurements.size - 1) :
-      scaling_factor += actual_measurements[i] / pixel_measurements[i]
-
-   return (scaling_factor / actual_measurements.size) +0.0355
 
 def identify_volume(length, od) :
    if(39 <= od <= 43 and length <= 60) :

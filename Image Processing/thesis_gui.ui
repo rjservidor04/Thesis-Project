@@ -8,8 +8,8 @@
     <property name="width">1400</property>
     <child>
       <object class="ttk.Frame" id="frame_main" named="True">
-        <property name="height">660</property>
-        <property name="width">1400</property>
+        <property name="height">300</property>
+        <property name="width">600</property>
         <layout manager="grid">
           <property name="column">0</property>
           <property name="row">0</property>
@@ -24,9 +24,9 @@
             <property name="width">200</property>
             <layout manager="grid">
               <property name="column">0</property>
-              <property name="padx">50 0</property>
+              <property name="padx">50</property>
               <property name="pady">100 0</property>
-              <property name="row">2</property>
+              <property name="row">0</property>
               <property name="sticky">nw</property>
             </layout>
             <child>
@@ -59,53 +59,15 @@
           </object>
         </child>
         <child>
-          <object class="ttk.Frame" id="frame_images" named="True">
-            <property name="height">0</property>
-            <property name="width">0</property>
-            <layout manager="grid">
-              <property name="column">1</property>
-              <property name="padx">100</property>
-              <property name="row">2</property>
-              <property name="sticky">w</property>
-            </layout>
-            <child>
-              <object class="tk.Canvas" id="cnv_loaded_image" named="True">
-                <property name="height">600</property>
-                <property name="width">400</property>
-                <layout manager="grid">
-                  <property name="column">0</property>
-                  <property name="padx">0 40</property>
-                  <property name="pady">40 0</property>
-                  <property name="row">0</property>
-                  <property name="sticky">e</property>
-                </layout>
-              </object>
-            </child>
-            <child>
-              <object class="tk.Canvas" id="cnv_processed_image" named="True">
-                <property name="height">600</property>
-                <property name="width">400</property>
-                <layout manager="grid">
-                  <property name="column">1</property>
-                  <property name="padx">0 40</property>
-                  <property name="pady">40 0</property>
-                  <property name="row">0</property>
-                  <property name="sticky">w</property>
-                </layout>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
           <object class="ttk.Frame" id="frame_report" named="True">
             <property name="height">200</property>
             <property name="width">200</property>
             <layout manager="grid">
-              <property name="column">0</property>
-              <property name="padx">40 0</property>
-              <property name="pady">200 0</property>
-              <property name="row">2</property>
-              <property name="sticky">sw</property>
+              <property name="column">1</property>
+              <property name="padx">100</property>
+              <property name="pady">100</property>
+              <property name="row">0</property>
+              <property name="sticky">e</property>
             </layout>
             <child>
               <object class="ttk.Label" id="lbl_report_title" named="True">

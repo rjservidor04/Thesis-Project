@@ -1,2 +1,0 @@
-# fit image to canvas
-# processed not done

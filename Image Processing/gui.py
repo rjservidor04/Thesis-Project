@@ -18,10 +18,7 @@ class ThesisGuiApp:
         self.mainwindow = builder.get_object("top", master)
         builder.connect_callbacks(self)
 
-        self.cnv_loaded_image = builder.get_object("cnv_loaded_image")
-        self.cnv_processed_image = builder.get_object("cnv_processed_image")
         self.btn_process_image = builder.get_object("btn_process_image")
-
         self.lbl_acquired_length = builder.get_object("lbl_acquired_length")
         self.lbl_acquired_outer_diameter = builder.get_object("lbl_acquired_outer_diameter")
         self.lbl_acquired_volume = builder.get_object("lbl_acquired_volume")
@@ -33,41 +30,41 @@ class ThesisGuiApp:
         # load image
         address = filedialog.askopenfilename(title="Select file", 
         filetypes= (("Images", ("*.jpg", "*.png", "*.bmp")), ("All Items", "*.*")))
-        img = Image.open(address)
-        self.loaded_image = ip.get_ROI(img)
-        
+        self.loaded_image = image = Image.open(address)
+
+        #preprocessing
+        w, h = image.size
+        new_h, new_w = int(h / 5), int(w / 5)
+        img = image.resize((new_w, new_h))
+        temp_img = ip.np.asarray(img)
+
         # display image
-        # ip.cv2.imshow("Loaded Image", self.loaded_image);
-        w, h = self.loaded_image.shape[:2]
-        self.cnv_loaded_image.config(width = w + 50, height = h + 50)
-        self.loaded_image_to_display = Image.fromarray(self.loaded_image)
-        self.loaded_image_to_display = ImageTk.PhotoImage(self.loaded_image_to_display)
-        self.cnv_loaded_image.create_image(0, 0, image = self.loaded_image_to_display, anchor = "nw")
+        ip.cv2.imshow("Loaded Image", temp_img);
+
+        #ROI
+        self.loaded_image = ip.get_ROI(temp_img)
+
+        # display extracted ROI image
+        ip.cv2.imshow("ROI Extracted Image", self.loaded_image)
 
         # activate process image button
         self.btn_process_image.configure(state = "normal")
 
     def btn_process_image_clicked(self):
         # process loaded image
-        processed_image = ip.segmentation(self.loaded_image)
-        processed_image = ip.morphological_closing_and_opening(processed_image)
+        self.loaded_image = processed_image = ip.morphological_closing_and_opening(ip.segmentation(self.loaded_image))
 
         # display processed image
-        # ip.cv2.imshow("Processed Image", processed_image)
-        w, h = processed_image.shape[:2]
-        self.cnv_processed_image.config(width = w + 50, height = h + 50)
-        self.processed_image_to_display = Image.fromarray(processed_image)
-        self.processed_image_to_display = ImageTk.PhotoImage(self.processed_image_to_display)
-        self.cnv_processed_image.create_image(0, 0, image = self.processed_image_to_display, anchor = "nw")
+        ip.cv2.imshow("Processed Image", processed_image)
 
         # getting the image length
-        px_length = ip.vertical_image_projection(processed_image, threshold = 30)
-        length_scaling_factor = ip.get_length_scaling_factor()
+        px_length = ip.vertical_image_projection(processed_image)
+        length_scaling_factor = ip.CONST_HSCALING
         actual_length = math.floor(length_scaling_factor * px_length)
 
         # getting the image outer diameter
-        px_od = ip.horizontal_image_projection(processed_image, threshold = 30)
-        od_scaling_factor = ip.get_od_scaling_factor()
+        px_od = ip.horizontal_image_projection(processed_image)
+        od_scaling_factor = ip.CONST_ODSCALING
         actual_od = math.floor(od_scaling_factor * px_od)
 
         # report generation
